@@ -16,6 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Core service layer for all banking operations.
+ * <p>
+ * Handles transaction processing, account balance enforcement, user authentication,
+ * and interacts directly with the local SQLite persistence layer via {@link DatabaseManager}.
+ * Operations altering account balances are transactional and atomic to ensure data integrity.
+ */
 public class BankingService {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -46,6 +53,14 @@ public class BankingService {
         }
     }
 
+    /**
+     * Registers a new banking customer with two default checking and savings accounts.
+     * Generates a unique 8-digit customer ID.
+     *
+     * @param fullName    The customer's legal name.
+     * @param rawPassword The plaintext password to be hashed.
+     * @return The newly generated customer ID, or null if registration fails.
+     */
     public synchronized String registerUser(String fullName, String rawPassword) {
         try (Connection conn = DatabaseManager.getConnection()) {
             String customerId = "";
@@ -88,6 +103,13 @@ public class BankingService {
         }
     }
 
+    /**
+     * Authenticates a user against the stored password hash.
+     *
+     * @param customerId  The 8-digit customer ID.
+     * @param rawPassword The plaintext password input.
+     * @return An authenticated User object populated with accounts, or null if invalid.
+     */
     public User authenticate(String customerId, String rawPassword) {
         try (Connection conn = DatabaseManager.getConnection()) {
             String query = "SELECT full_name, password_hash, email, phone_number, is_admin, is_suspended FROM users WHERE customer_id = ?";
@@ -154,6 +176,15 @@ public class BankingService {
         }
     }
 
+    /**
+     * Executes a transactional fund transfer between two local accounts.
+     * Both accounts are verified for active status and sufficient balances prior to committal.
+     *
+     * @param sourceAccountId The account ID initiating the transfer.
+     * @param destAccountId   The recipient account ID.
+     * @param amount          The transfer amount (must be positive).
+     * @throws Exception If funds are insufficient, accounts are suspended, or SQL errors occur.
+     */
     public void transferFunds(String sourceAccountId, String destAccountId, double amount) throws Exception {
         if (amount <= 0) throw new IllegalArgumentException("Transfer amount must be positive.");
         
@@ -201,6 +232,13 @@ public class BankingService {
         }
     }
 
+    /**
+     * Withdraws funds from a specified account.
+     *
+     * @param accountId The account to withdraw from.
+     * @param amount    The amount to withdraw (must be positive).
+     * @throws Exception If funds are insufficient or the account is suspended.
+     */
     public void withdraw(String accountId, double amount) throws Exception {
         if (amount <= 0) throw new IllegalArgumentException("Withdrawal amount must be positive.");
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -213,6 +251,13 @@ public class BankingService {
         }
     }
     
+    /**
+     * Deposits funds into a specified account.
+     *
+     * @param accountId The account to deposit into.
+     * @param amount    The amount to deposit (must be positive).
+     * @throws Exception If the account is suspended or a database error occurs.
+     */
     public void deposit(String accountId, double amount) throws Exception {
         if (amount <= 0) throw new IllegalArgumentException("Deposit amount must be positive.");
         try (Connection conn = DatabaseManager.getConnection()) {

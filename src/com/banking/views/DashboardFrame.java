@@ -8,6 +8,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 
+/**
+ * Core user interface dashboard for the banking application.
+ * Manages the presentation layer for account overviews, fund transfers, 
+ * transaction ledgers, and user profile management.
+ */
 public class DashboardFrame extends JFrame {
     private JLabel welcomeLabel;
     
@@ -157,7 +162,7 @@ public class DashboardFrame extends JFrame {
         cardsPanel.add(expensesCard, "grow");
         dashboardView.add(cardsPanel, "growx, wrap");
 
-        // Small stripped-down recent history table for the overview
+        /* Initialize restricted-view transaction ledger for the primary dashboard component. */
         recentTxTableModel = new DefaultTableModel(new String[]{"Date", "Amount", "Description"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };

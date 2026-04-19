@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents an authenticated system identity.
+ * Encapsulates core customer profiles, role-based privileges, operational status, 
+ * and linked ownership of multiple {@link Account} entities.
+ */
 public class User implements Serializable {
     private static final long serialVersionUID = 4L;
     

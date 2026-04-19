@@ -9,11 +9,11 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 
 /**
- * One-time utility: Copies bank.db → src/com/banking/resources/bank.db
- * and anonymizes all personal details (names, emails, phone numbers).
- *
- * Run this ONCE from the project root before doing `mvn package`.
- * After running, the anonymized DB is bundled into the JAR/EXE automatically.
+ * Utility class for database anonymization and preparation.
+ * <p>
+ * This tool duplicates the active SQLite database to the project's resources directory
+ * and scrubs sensitive personal identifiable information (PII) to ensure safely redistributable 
+ * demo data. It should be executed prior to packaging the application for distribution.
  */
 public class AnonymizeDB {
 
@@ -29,21 +29,21 @@ public class AnonymizeDB {
             System.exit(1);
         }
 
-        // 1 – Create destination directory
+        /* Ensure the destination directory path exists. */
         new File(DEST_DIR).mkdirs();
 
-        // 2 – Copy the live database to resources
+        /* Duplicate the live database into the embedded resources directory. */
         Files.copy(Paths.get(SOURCE_DB), Paths.get(DEST_DB), StandardCopyOption.REPLACE_EXISTING);
         System.out.println("[OK] Copied bank.db → " + DEST_DB);
 
-        // 3 – Anonymize the copy: replace real names, wipe email & phone
+        /* Scrub Personally Identifiable Information (PII) from the bundled database. */
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + DEST_DB);
              Statement  stmt = conn.createStatement()) {
 
             stmt.execute("UPDATE users SET full_name = 'User1', email = '', phone_number = '' WHERE customer_id = '07168386'");
             stmt.execute("UPDATE users SET full_name = 'User2', email = '', phone_number = '' WHERE customer_id = '35395655'");
             stmt.execute("UPDATE users SET full_name = 'User3', email = '', phone_number = '' WHERE customer_id = '69864325'");
-            // Admin account: just wipe contact info, keep role
+            /* Retain administrator privileges while stripping contact details. */
             stmt.execute("UPDATE users SET email = '', phone_number = '' WHERE customer_id = 'admin'");
 
             System.out.println("[OK] User names → User1 / User2 / User3");

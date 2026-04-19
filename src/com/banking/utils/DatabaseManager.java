@@ -11,7 +11,7 @@ public class DatabaseManager {
 
     private static final String DB_NAME       = "bank.db";
     private static final String URL           = "jdbc:sqlite:" + DB_NAME;
-    // Path to the anonymized demo DB bundled inside the JAR/EXE
+    /** Path to the pre-packaged demonstration database resource. */
     private static final String BUNDLED_RESOURCE = "/com/banking/resources/bank.db";
 
     public static Connection getConnection() throws SQLException {
@@ -21,18 +21,17 @@ public class DatabaseManager {
     public static void initializeDatabase() {
         File dbFile = new File(DB_NAME);
 
-        // ── Step 1: If no local bank.db exists, extract the bundled demo database ──
-        // The bundled DB already has tables, demo users, and transaction history.
+        /* Phase 1: Attempt to extract the embedded demonstration database if no local instance exists. */
         if (!dbFile.exists()) {
             if (extractBundledDatabase(dbFile)) {
                 System.out.println("[DB] Extracted bundled demo database → " + DB_NAME);
-                return; // bundled DB is fully ready — nothing else to do
+                return; /* Extraction successful; database initialization complete. */
             }
         }
 
-        // ── Step 2: Fallback — create tables and seed demo users from scratch ──
-        // Reached only when: (a) bank.db already exists (normal repeat launch),
-        // or (b) no bundled resource is found (e.g. running from IDE without packaging).
+        /* Phase 2: Fallback initialization. 
+         * Executes if the local database already exists or if the resource extraction fails.
+         */
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
 
             String createUsers = "CREATE TABLE IF NOT EXISTS users ("
@@ -67,7 +66,7 @@ public class DatabaseManager {
             stmt.execute(createAccounts);
             stmt.execute(createTransactions);
 
-            // Admin account
+            /* Initialize root administrator credential wrapper. */
             String injectAdmin = "INSERT OR IGNORE INTO users "
                     + "(customer_id, full_name, password_hash, email, phone_number, is_admin, is_suspended) "
                     + "VALUES (?, ?, ?, '', '', 1, 0)";
@@ -78,7 +77,7 @@ public class DatabaseManager {
                 adminStmt.executeUpdate();
             }
 
-            // Demo users (generic names — no personal details)
+            /* Seed generic demonstration accounts to bypass missing resource payloads. */
             String injectUser = "INSERT OR IGNORE INTO users "
                     + "(customer_id, full_name, password_hash, email, phone_number, is_admin, is_suspended) "
                     + "VALUES (?, ?, ?, '', '', 0, 0)";
@@ -88,7 +87,7 @@ public class DatabaseManager {
             try (PreparedStatement usrStmt = conn.prepareStatement(injectUser);
                  PreparedStatement accStmt = conn.prepareStatement(injectAcc)) {
 
-                // User1
+                /* Primary demonstration identity 1 */
                 usrStmt.setString(1, "07168386");
                 usrStmt.setString(2, "User1");
                 usrStmt.setString(3, SecurityUtils.hashPassword("1234567k"));
@@ -96,7 +95,7 @@ public class DatabaseManager {
                 accStmt.setString(1, "CHK-76D3C"); accStmt.setString(2, "07168386"); accStmt.setString(3, "Checking"); accStmt.executeUpdate();
                 accStmt.setString(1, "SAV-9286E"); accStmt.setString(2, "07168386"); accStmt.setString(3, "Savings");  accStmt.executeUpdate();
 
-                // User2
+                /* Primary demonstration identity 2 */
                 usrStmt.setString(1, "35395655");
                 usrStmt.setString(2, "User2");
                 usrStmt.setString(3, SecurityUtils.hashPassword("1234567a"));
@@ -104,7 +103,7 @@ public class DatabaseManager {
                 accStmt.setString(1, "CHK-478F4"); accStmt.setString(2, "35395655"); accStmt.setString(3, "Checking"); accStmt.executeUpdate();
                 accStmt.setString(1, "SAV-593DA"); accStmt.setString(2, "35395655"); accStmt.setString(3, "Savings");  accStmt.executeUpdate();
 
-                // User3
+                /* Primary demonstration identity 3 */
                 usrStmt.setString(1, "69864325");
                 usrStmt.setString(2, "User3");
                 usrStmt.setString(3, SecurityUtils.hashPassword("1234567p"));
@@ -119,8 +118,10 @@ public class DatabaseManager {
     }
 
     /**
-     * Copies the bundled demo bank.db from inside the JAR/EXE to the current
-     * working directory. Returns true if the extraction succeeded.
+     * Extracts the embedded demonstration database from the application archive to the local directory.
+     *
+     * @param target The target file definition for extraction.
+     * @return true if the resource stream was successfully copied, false otherwise.
      */
     private static boolean extractBundledDatabase(File target) {
         try (InputStream in = DatabaseManager.class.getResourceAsStream(BUNDLED_RESOURCE)) {

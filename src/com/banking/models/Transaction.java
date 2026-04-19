@@ -3,6 +3,10 @@ package com.banking.models;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/**
+ * Represents an immutable financial transaction executed within the system.
+ * Captures historical context across withdrawals, deposits, and inter-account transfers.
+ */
 public class Transaction implements Serializable {
     private static final long serialVersionUID = 2L;
     
