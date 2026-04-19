@@ -1,20 +1,25 @@
-User name: Krishna
-Login info:
+Demo User Credentials
+=====================
+
+User name: User1
 Customer ID: 07168386
 Password: 1234567k
-Checking Account No/ID: CHK-76D3C
-Savings Account No/ID: SAV-9286E
+Checking Account No: CHK-76D3C
+Savings Account No:  SAV-9286E
 
-User name: Agrim
-Login info:
+User name: User2
 Customer ID: 35395655
 Password: 1234567a
-Checking Account No/ID: CHK-478F4
-Savings Account No/ID: SAV-593DA
+Checking Account No: CHK-478F4
+Savings Account No:  SAV-593DA
 
-User name: Pranshu
-Login info:
+User name: User3
 Customer ID: 69864325
 Password: 1234567p
-Checking Account No/ID: CHK-5954E
-Savings Account No/ID: SAV-6B268
+Checking Account No: CHK-5954E
+Savings Account No:  SAV-6B268
+
+Admin Credentials
+=================
+Customer ID: admin
+Password: admin123
